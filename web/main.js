@@ -4,7 +4,7 @@ let interval = null;
 let particles = [];
 let tick = 0;
 
-const deg_split = 2;
+const deg_split = 1;
 const deg_split2 = 3;
 
 const deg_kill_lower = -1;
@@ -15,6 +15,11 @@ I: stable
 II: repetitive
 III: chaotic
 IV: edge of chaos
+
+-- SPL=REFLECT-HALF (K=0)
+S=1 K>=2,3,4,5: I
+S=1,2 K>=4: I+glider
+
 
 -- SPL=REFLECT
 S=1 K>=2: I
@@ -213,6 +218,12 @@ function reflect(ref, p) {
     return {x: ref.x - dx, y: ref.y - dy};
 }
 
+function reflect_half(ref, p) {
+    const dx = p.x - ref.x;
+    const dy = p.y - ref.y;
+    return {x: ref.x - dx * 1.01, y: ref.y - dy * 1.01};
+}
+
 function step() {
     const num_particles = particles.length;
 
@@ -253,7 +264,7 @@ function step() {
         const p = particles[i];
         const deg = degree[i];
 
-        if (deg == 1 || deg >= deg_kill_upper) {
+        if (deg == 0 || deg >= deg_kill_upper) {
             // die
         } else if (deg === deg_split || deg === deg_split2) {
             // split
@@ -264,7 +275,7 @@ function step() {
                 }
                 const q = particles[j];
                 if (sqdist(p, q) <= 1) {
-                    new_particles.push(reflect(p, q));
+                    new_particles.push(reflect_half(p, q));
                 }
             }
         } else {
