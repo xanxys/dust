@@ -5,31 +5,14 @@ let particles = [];
 let tick = 0;
 
 const deg_split = 1;
-const deg_split2 = 2;
-const deg_kill = 3;
+const deg_split2 = 3;
+const deg_kill = 6;
 
 /*
 I: stable
 II: repetitive
 III: chaotic
 IV: edge of chaos
-
--- SPL=KEEP+REFLECT (incl. K=0)
-S=1 K>=2: I, II
-S=1 K>=3: I, (II)
-S=1 K>=4: I, (II), linear growth that stops when colliding
-S=1 K>=5: I, linear growth that stops when colliding
-S=1 K>=6: I, linear growth that stops when colliding
-
-S=2 K>=3: (II), III, lattice-like
-S=2 K>=4: III
-S=2 K>=5: III -> I
-S=2 K>=6: I
-
-S=1,2 K>=3: II, (III)
-S=1,2 K>=4: III
-S=1,2 K>=5: II, III, noise between lattice blobs
-S=1,2 K>=6: I, almost stable polycrystal
 
 -- SPL=REFLECT (incl. K=0)
 S=1 K>=2: I, nothing
@@ -46,6 +29,11 @@ S=1,2 K>=4: III -> I
 * S=1,2 K>=5: often I, II, Potentially IV
 S=1,2 K>=6: III -> I, mesh remains
 
+S=1,3 K>=4: III -> I
+* S=1,3 K>=5: Potential IV, ladder-like puffer
+S=1,3 K>=6: III, micro+mesoscale III
+
+
 -- SPL=REFLECT
 S=1 K>=2: I
 S=1 K>=3: I
@@ -58,6 +46,24 @@ S=2 K>=5: III, gliders often exist, but destroyed by III region
 S=1,2 K>=3: III
 S=1,2 K>=4: III
 S=1,2 K>=5: III
+
+
+-- SPL=KEEP + REFLECT (incl. K=0)
+S=1 K>=2: I, II
+S=1 K>=3: I, (II)
+S=1 K>=4: I, (II), linear growth that stops when colliding
+S=1 K>=5: I, linear growth that stops when colliding
+S=1 K>=6: I, linear growth that stops when colliding
+
+S=2 K>=3: (II), III, lattice-like
+S=2 K>=4: III
+S=2 K>=5: III -> I
+S=2 K>=6: I
+
+S=1,2 K>=3: II, (III)
+S=1,2 K>=4: III
+S=1,2 K>=5: II, III, noise between lattice blobs
+S=1,2 K>=6: I, almost stable polycrystal
 
 -- SPL=KEEP + REFLECT-AVG
 S=2 K>=3: I
@@ -204,7 +210,7 @@ function step() {
 
         if (deg == 0 || deg >= deg_kill) {
             // die
-        } else if (deg == 2) {
+        } else if (deg === deg_split || deg === deg_split2) {
             // split
             const ns = [];
             for (let j = 0; j < num_particles; j++) {
@@ -213,11 +219,9 @@ function step() {
                 }
                 const q = particles[j];
                 if (sqdist(p, q) <= 1) {
-                    ns.push(q);
+                    new_particles.push(reflect(p, q));
                 }
             }
-            new_particles.push(p);
-            new_particles.push(reflect(p, avg(ns)));
         } else {
             // keep
             new_particles.push(p);
