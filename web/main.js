@@ -130,7 +130,7 @@ S=2 K=0,K>=5: I, mesh coarsing
 */
 
 
-function redraw() {
+function redraw(origin) {
     let canvas = document.getElementById("main");
     const ctx = canvas.getContext("2d");
 
@@ -138,6 +138,7 @@ function redraw() {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    ctx.translate(origin.x, origin.y);
     ctx.scale(10, 10);
 
     const num_particles = particles.length;
@@ -300,19 +301,46 @@ function main() {
             interval: null,
             tick: 0,
             numParticles: 0,
+
+            // viewport
+            viewportOrigin: {x: 0, y: 0},
+
+            // drag control
+            dragging: false,
+            prevX: 0,
+            prevY: 0,
         },
         methods: {
+            dragStart: function(ev) {
+                this.dragging = true;
+                this.prevX = ev.clientX;
+                this.prevY = ev.clientY;
+            },
+            dragStop: function() {
+                this.dragging = false;
+            },
+            drag: function(ev) {
+                if (!this.dragging) {
+                    return;
+                }
+                const dx = ev.clientX - this.prevX;
+                const dy = ev.clientY - this.prevY;
+                this.viewportOrigin = {x: this.viewportOrigin.x + dx, y: this.viewportOrigin.y + dy};
+
+                this.prevX = ev.clientX;
+                this.prevY = ev.clientY;
+            },
             clickReset: function() {
                 init();
                 this.numParticles = particles.length;
                 this.tick = 0;
-                redraw();
+                redraw(this.viewportOrigin);
             },
             clickStep: function() {
                 step();
                 this.numParticles = particles.length;
                 this.tick += 1;
-                redraw();
+                redraw(this.viewportOrigin);
             },
             clickStart: function() {
                 if (this.interval !== null) {
@@ -322,7 +350,7 @@ function main() {
                     step();
                     this.numParticles = particles.length;
                     this.tick += 1;
-                    redraw();
+                    redraw(this.viewportOrigin);
                 }, 50);
             },
             clickStop: function() {
