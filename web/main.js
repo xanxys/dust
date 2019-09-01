@@ -7,8 +7,8 @@ let tick = 0;
 const deg_split = 2;
 const deg_split2 = 3;
 
-const deg_kill_lower = 1;
-const deg_kill_upper = 6;
+const deg_kill_lower = -1;
+const deg_kill_upper = 5;
 
 /*
 I: stable
@@ -60,7 +60,21 @@ S=2,3 K>=4: III, (IV), ocassional ladder-glider destroyed by III region
 S=2,3 K>=5: III, (IV), ocassional ladder-glider destroyed by III region
 S=2,3 K>=6: III
 
--- SPL=REFLECT (K<=1)
+-- SPL=REFLECT (K=1)
+S=2 K>=3: I
+S=2 K>=4: I, gliders
+S=2 K>=5: I, gliders
+S=2 K>=6: I, meshes
+
+S=3 K>=4: I
+S=3 K>=5: III, II -> I
+S=3 K>=6: III
+
+S=2,3 K>=4: IV->I, glider+puffer
+S=2,3 K>=5: II, III -> III
+S=2,3 K>=6: III
+
+-- SPL=REFLECT (K=0,1)
 S=2 K>=3: I, glider exist, no replication
 S=2 K>=4: I
 S=2 K>=5: I
@@ -239,7 +253,7 @@ function step() {
         const p = particles[i];
         const deg = degree[i];
 
-        if (deg <= deg_kill_lower || deg >= deg_kill_upper) {
+        if (deg == 1 || deg >= deg_kill_upper) {
             // die
         } else if (deg === deg_split || deg === deg_split2) {
             // split
