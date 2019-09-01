@@ -5,10 +5,10 @@ let particles = [];
 let tick = 0;
 
 const deg_split = 1;
-const deg_split2 = 3;
+const deg_split2 = 2;
 
-const deg_kill_lower = -1;
-const deg_kill_upper = 5;
+const deg_kill_lower = 0;
+const deg_kill_upper = 4;
 
 /*
 I: stable
@@ -17,8 +17,11 @@ III: chaotic
 IV: edge of chaos
 
 -- SPL=REFLECT-a
-S=1,3 K=0,>=5
+
 S=1,2 K=0,>=5
+ 
+S=1,3 K=0,>=5
+ 0.95
 
 Search good a.
 
@@ -228,8 +231,8 @@ function reflect(ref, p) {
 function reflect_half(ref, p) {
     const dx = p.x - ref.x;
     const dy = p.y - ref.y;
-    const k = 1.1;
-    return {x: ref.x - dx * k, y: ref.y - dy * k};
+    const k = 1;
+    return {x: ref.x - dy * k, y: ref.y + dx * k};
 }
 
 function step() {
@@ -272,7 +275,7 @@ function step() {
         const p = particles[i];
         const deg = degree[i];
 
-        if (deg == 0 || deg >= deg_kill_upper) {
+        if (deg <= deg_kill_lower || deg >= deg_kill_upper) {
             // die
         } else if (deg === deg_split || deg === deg_split2) {
             // split
@@ -286,6 +289,7 @@ function step() {
                     new_particles.push(reflect_half(p, q));
                 }
             }
+            new_particles.push(p);
         } else {
             // keep
             new_particles.push(p);
