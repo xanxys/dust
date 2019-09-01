@@ -12,13 +12,16 @@
                 @mousemove="drag" @mousewheel="zoom"></canvas>
         </div>
 
-        <div>tick={{tick}}</div>
-        <div>#particles={{numParticles}}</div>
-        <div id="label_rule"></div>
-
         <button @click="clickReset">Reset</button>
+
+        <div>tick={{tick}}</div>
         <button @click="clickStep">Step</button>
         <button @click="clickTogglePlaying">{{interval === null ? "Start" : "Stop"}}</button>
+
+        <button @click="clickCapture">Capture</button>
+
+        <div>#particles={{numParticles}}</div>
+        <div id="label_rule"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>

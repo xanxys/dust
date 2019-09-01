@@ -130,12 +130,19 @@ S=2 K=0,K>=5: I, mesh coarsing
 */
 
 
-function redraw(scale, origin) {
+function redraw(scale, origin, box) {
     let canvas = document.getElementById("main");
     const ctx = canvas.getContext("2d");
 
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (box !== null) {
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.lineWidth = 1;
+        ctx.rect(box.p0.x, box.p0.y, box.p1.x - box.p0.x, box.p1.y - box.p0.y);
+        ctx.stroke();
+    }
 
     ctx.save();
     ctx.translate(origin.x, origin.y);
@@ -254,6 +261,20 @@ function step() {
     particles = new_particles;
 }
 
+class Vec2 {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+class BoxSelection {
+    constructor(p0, p1) {
+        this.p0 = p0;
+        this.p1 = p1;
+    }
+}
+
 function main() {
     const vm = new Vue({
         el: "#app",
@@ -264,34 +285,49 @@ function main() {
 
             // viewport
             viewportScale: 10, // px/space
-            viewportOrigin: {x: 0, y: 0}, // px
+            viewportOrigin: new Vec2(0, 0), // px
 
             // drag control
+            captureMode: false,
             dragging: false,
-            prevX: 0,
-            prevY: 0,
+            prevPos: new Vec2(0, 0),
+            selectionBox: null,
         },
         methods: {
             dragStart: function(ev) {
                 this.dragging = true;
-                this.prevX = ev.clientX;
-                this.prevY = ev.clientY;
+                this.prevPos = new Vec2(ev.clientX, ev.clientY);
             },
             dragStop: function() {
                 this.dragging = false;
+                if (this.captureMode) {
+                    // actually capture
+                    this.selectionBox = null;
+                    this.captureMode = false;
+                }
+                this.redraw();
             },
             drag: function(ev) {
                 if (!this.dragging) {
                     return;
                 }
-                const dx = ev.clientX - this.prevX;
-                const dy = ev.clientY - this.prevY;
-                this.viewportOrigin = {x: this.viewportOrigin.x + dx, y: this.viewportOrigin.y + dy};
 
-                this.prevX = ev.clientX;
-                this.prevY = ev.clientY;
+                const currPos = new Vec2(ev.clientX, ev.clientY);
+                if (this.captureMode) {
+                    // capture: specify box
+                    this.selectionBox = new BoxSelection(this.prevPos, currPos);
+                } else {
+                    // normal: move canvas
+                    const dx = ev.clientX - this.prevPos.x;
+                    const dy = ev.clientY - this.prevPos.y;
+                    this.viewportOrigin = new Vec2(this.viewportOrigin.x + dx, this.viewportOrigin.y + dy);
+                    this.prevPos = currPos;
+                }
 
-                redraw(this.viewportScale, this.viewportOrigin);
+                this.redraw();
+            },
+            redraw: function() {
+                redraw(this.viewportScale, this.viewportOrigin, this.selectionBox);
             },
             zoom: function(ev) {
                 ev.preventDefault();
@@ -305,38 +341,55 @@ function main() {
                 this.viewportOrigin.x = ev.offsetX - centerXSp * this.viewportScale;
                 this.viewportOrigin.y = ev.offsetY - centerYSp * this.viewportScale;
 
-                redraw(this.viewportScale, this.viewportOrigin);
+                this.redraw();
+            },
+            startStepping: function() {
+                if (this.interval !== null) {
+                    return;
+                }
+                this.interval = setInterval(() => {
+                    step();
+                    this.numParticles = particles.length;
+                    this.tick += 1;
+                    this.redraw();
+                }, 50);    
+            },
+            stopStepping: function() {
+                if (this.interval === null) {
+                    return;
+                }
+                clearInterval(this.interval);
+                this.interval = null;
             },
             clickReset: function() {
                 init();
                 this.numParticles = particles.length;
                 this.tick = 0;
-                redraw(this.viewportScale, this.viewportOrigin);
+                this.redraw();
             },
             clickStep: function() {
                 step();
                 this.numParticles = particles.length;
                 this.tick += 1;
-                redraw(this.viewportScale, this.viewportOrigin);
+                this.redraw();
             },
             clickTogglePlaying: function() {
                 if (this.interval === null) {
-                    this.interval = setInterval(() => {
-                        step();
-                        this.numParticles = particles.length;
-                        this.tick += 1;
-                        redraw(this.viewportScale, this.viewportOrigin);
-                    }, 50);    
+                    this.startStepping();
                 } else {
-                    clearInterval(this.interval);
-                    this.interval = null;
+                    this.stopStepping();
                 }
+            },
+            clickCapture: function() {
+                this.dragging = false;
+                this.stopStepping();
+                this.captureMode = true;
             },
         },
     });
 
     init();
-    vm.clickTogglePlaying();
+    vm.startStepping();
 }
 
 main();
