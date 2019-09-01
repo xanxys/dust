@@ -16,6 +16,13 @@ II: repetitive
 III: chaotic
 IV: edge of chaos
 
+-- SPL=REFLECT-a
+S=1,3 K=0,>=5
+S=1,2 K=0,>=5
+
+Search good a.
+
+
 -- SPL=REFLECT-HALF (K=0)
 S=1 K>=2,3,4,5: I
 S=1,2 K>=4: I+glider
@@ -221,7 +228,8 @@ function reflect(ref, p) {
 function reflect_half(ref, p) {
     const dx = p.x - ref.x;
     const dy = p.y - ref.y;
-    return {x: ref.x - dx * 1.01, y: ref.y - dy * 1.01};
+    const k = 1.1;
+    return {x: ref.x - dx * k, y: ref.y - dy * k};
 }
 
 function step() {
