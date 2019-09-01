@@ -13,9 +13,11 @@
         </div>
 
         <button @click="clean">Clean</button>
-        <button @click="addRandom">+random</button>
-        <button @click="addGlider1">+glider1 x 10</button>
-        <button @click="addPuffer1">+puffer1 x 10</button>
+        <button @click="addRandom(500)">+random x 500</button>
+        <button @click="addGlider1(1)">+glider1 x 1</button>
+        <button @click="addGlider1(10)">+glider1 x 10</button>
+        <button @click="addPuffer1(1)">+puffer1 x 1</button>
+        <button @click="addPuffer1(10)">+puffer1 x 10</button>
 
         <div>tick={{tick}}</div>
         <button @click="clickStep">Step</button>

@@ -205,8 +205,8 @@ function cleanParticles() {
     particles = [];
 }
 
-function addRandom() {
-    for (let i = 0; i < 500; i++) {
+function addRandom(num) {
+    for (let i = 0; i < num; i++) {
         particles.push(new Vec2(Math.random() * 20 + 15, Math.random() * 20 + 15));
     }
 }
@@ -359,16 +359,16 @@ function main() {
                 this.tick = 0;
                 this.redraw();
             },
-            addRandom: function() {
-                addRandom();
+            addRandom: function(num) {
+                addRandom(num);
                 this.redraw();
             },
-            addGlider1: function() {
-                addPatternsRandomly(glider1, 10);
+            addGlider1: function(num) {
+                addPatternsRandomly(glider1, num);
                 this.redraw();
             },
-            addPuffer1: function() {
-                addPatternsRandomly(puffer1, 10);
+            addPuffer1: function(num) {
+                addPatternsRandomly(puffer1, num);
                 this.redraw();
             },
             redraw: function() {
