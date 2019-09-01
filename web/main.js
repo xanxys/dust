@@ -1,4 +1,5 @@
 "use strict";
+import {Vec2, AABB} from "./math.js";
 
 let particles = [];
 
@@ -203,7 +204,18 @@ function redraw(scale, origin, box) {
 function init() {
     particles = [];
     for (let i = 0; i < 500; i++) {
-        particles.push({x: Math.random() * 20 + 15, y: Math.random() * 20 + 15});
+        particles.push(new Vec2(Math.random() * 20 + 15, Math.random() * 20 + 15));
+    }
+
+    const nrmGlider1 = normalizePos(glider1);
+    for (let i = 0; i < 10; i++) {
+        const dp = new Vec2(Math.random() * 10, Math.random() * 10);
+        const theta = Math.random() * (2 * Math.PI);
+
+        const c = Math.cos(theta);
+        const s = Math.sin(theta);
+        
+        nrmGlider1.forEach(p => particles.push(p.clone().rotate(c, s).add(dp)));
     }
 }
 
@@ -216,6 +228,21 @@ function reflect(ref, p) {
     const dy = p.y - ref.y;
     return {x: ref.x - dx, y: ref.y - dy};
 }
+
+function normalizePos(ps) {
+    const res = new Vec2(0, 0);
+    ps.forEach(p => res.add(p));
+    const center = res.mult(1.0 / ps.length);
+    return ps.map(p => p.clone().sub(center));
+}
+
+function parse(pjson) {
+    return pjson.map(p => new Vec2(p.x, p.y));
+}
+
+const glider1 = parse([{"x":-3.251099453334959,"y":-12.621436972933157},{"x":-3.5444067296287187,"y":-13.253306053867515},{"x":-3.8377140059224786,"y":-13.885175134801873},{"x":-3.5444067296287187,"y":-13.253306053867515},{"x":-4.424328558509998,"y":-15.148913296670589},{"x":-4.277674920363118,"y":-14.83297875620341},{"x":-4.131021282216238,"y":-14.517044215736231},{"x":-3.8377140059224786,"y":-13.885175134801873},{"x":-3.251099453334959,"y":-12.621436972933157}]);
+
+const puffer1 = parse([{"x":66.29054711255714,"y":172.30115399605788},{"x":67.29100366212229,"y":172.46509825411027},{"x":67.6609864202613,"y":173.82518521242548},{"x":68.29146021168745,"y":172.62904251216267},{"x":68.73088739694686,"y":172.30623235491166},{"x":68.06871900550912,"y":173.56713560187288},{"x":67.06826245594397,"y":173.40319134382048},{"x":66.06780590637881,"y":173.23924708576808}]);
 
 function step() {
     const num_particles = particles.length;
@@ -249,7 +276,8 @@ function step() {
                     continue;
                 }
                 const q = particles[j];
-                if (sqdist(p, q) <= 1) {
+                const d = sqdist(p, q);
+                if (d <= 1) {
                     new_particles.push(reflect(p, q));
                 }
             }
@@ -259,46 +287,6 @@ function step() {
         }        
     }
     particles = new_particles;
-}
-
-class Vec2 {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    add(v) {
-        this.x += v.x;
-        this.y += v.y;
-        return this;
-    }
-
-    sub(v) {
-        this.x -= v.x;
-        this.y -= v.y;
-        return this;
-    }
-
-    mult(k) {
-        this.x *= k;
-        this.y *= k;
-        return this;
-    }
-
-    clone() {
-        return new Vec2(this.x, this.y);
-    }
-}
-
-class AABB {
-    constructor(p0, p1) {
-        this.p0 = new Vec2(Math.min(p0.x, p1.x), Math.min(p0.y, p1.y));
-        this.p1 = new Vec2(Math.max(p0.x, p1.x), Math.max(p0.y, p1.y));
-    }
-
-    contains(p) {
-        return this.p0.x <= p.x && p.x <= this.p1.x && this.p0.y <= p.y && p.y <= this.p1.y;
-    }
 }
 
 function getParticlesIn(box) {
