@@ -12,7 +12,10 @@
                 @mousemove="drag" @mousewheel="zoom"></canvas>
         </div>
 
-        <button @click="clickReset">Reset</button>
+        <button @click="clean">Clean</button>
+        <button @click="addRandom">+random</button>
+        <button @click="addGlider1">+glider1 x 10</button>
+        <button @click="addPuffer1">+puffer1 x 10</button>
 
         <div>tick={{tick}}</div>
         <button @click="clickStep">Step</button>

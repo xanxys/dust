@@ -201,21 +201,25 @@ function redraw(scale, origin, box) {
     $("#label_rule").text(rule_text);
 }
 
-function init() {
+function cleanParticles() {
     particles = [];
+}
+
+function addRandom() {
     for (let i = 0; i < 500; i++) {
         particles.push(new Vec2(Math.random() * 20 + 15, Math.random() * 20 + 15));
     }
+}
 
-    const nrmGlider1 = normalizePos(glider1);
-    for (let i = 0; i < 10; i++) {
+function addPatternsRandomly(pat, num) {
+    const npat = normalizePos(pat);
+    for (let i = 0; i < num; i++) {
         const dp = new Vec2(Math.random() * 10, Math.random() * 10);
         const theta = Math.random() * (2 * Math.PI);
 
         const c = Math.cos(theta);
         const s = Math.sin(theta);
-        
-        nrmGlider1.forEach(p => particles.push(p.clone().rotate(c, s).add(dp)));
+        npat.forEach(p => particles.push(p.clone().rotate(c, s).add(dp)));
     }
 }
 
@@ -350,7 +354,25 @@ function main() {
 
                 this.redraw();
             },
+            clean: function() {
+                cleanParticles();
+                this.tick = 0;
+                this.redraw();
+            },
+            addRandom: function() {
+                addRandom();
+                this.redraw();
+            },
+            addGlider1: function() {
+                addPatternsRandomly(glider1, 10);
+                this.redraw();
+            },
+            addPuffer1: function() {
+                addPatternsRandomly(puffer1, 10);
+                this.redraw();
+            },
             redraw: function() {
+                this.numParticles = particles.length;
                 redraw(this.viewportScale, this.viewportOrigin, this.selectionBox);
             },
             zoom: function(ev) {
@@ -385,12 +407,6 @@ function main() {
                 clearInterval(this.interval);
                 this.interval = null;
             },
-            clickReset: function() {
-                init();
-                this.numParticles = particles.length;
-                this.tick = 0;
-                this.redraw();
-            },
             clickStep: function() {
                 step();
                 this.numParticles = particles.length;
@@ -412,7 +428,8 @@ function main() {
         },
     });
 
-    init();
+    cleanParticles();
+    addRandom();
     vm.startStepping();
 }
 
