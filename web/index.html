@@ -1,26 +1,30 @@
 <!DOCTYPE HTML>
 <html>
-    <body>
-        <div id="app">
 
-            
-            <div>
-                <canvas id="main" width="800" height="800" @mousedown="dragStart" @mouseleave="dragStop" @mouseup="dragStop" @mousemove="drag" @mousewheel="zoom"></canvas>
-            </div>
+<head>
+    <title>Dust - CSDT Particle Reaction system</title>
+</head>
 
-            <div>tick={{tick}}</div>
-            <div>#particles={{numParticles}}</div>
-            <div id="label_rule"></div>
-
-            <button @click="clickReset">Reset</button>
-            <button @click="clickStep">Step</button>
-            <button @click="clickStart">Start</button>
-        <button @click="clickStop">Stop</button>
+<body>
+    <div id="app">
+        <div>
+            <canvas id="main" width="800" height="800" @mousedown="dragStart" @mouseleave="dragStop" @mouseup="dragStop"
+                @mousemove="drag" @mousewheel="zoom"></canvas>
         </div>
 
+        <div>tick={{tick}}</div>
+        <div>#particles={{numParticles}}</div>
+        <div id="label_rule"></div>
 
-        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-        <script src="./main.js"></script>
-    </body>
+        <button @click="clickReset">Reset</button>
+        <button @click="clickStep">Step</button>
+        <button @click="clickTogglePlaying">{{interval === null ? "Start" : "Stop"}}</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="./main.js"></script>
+</body>
+
 </html>

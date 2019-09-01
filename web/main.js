@@ -204,53 +204,14 @@ function sqdist(p, q) {
     return (p.x - q.x) * (p.x - q.x) + (p.y - q.y) * (p.y - q.y);
 }
 
-function avg(ps) {
-    let sx = 0;
-    let sy = 0;
-    for (let i = 0; i < ps.length; i++) {
-        sx += ps[i].x;
-        sy += ps[i].y;
-    }
-    let k = 1.0 / ps.length;
-    return {x: k * sx, y: k * sy};
-}
-
 function reflect(ref, p) {
     const dx = p.x - ref.x;
     const dy = p.y - ref.y;
     return {x: ref.x - dx, y: ref.y - dy};
 }
 
-function reflect_half(ref, p) {
-    const dx = p.x - ref.x;
-    const dy = p.y - ref.y;
-    const k = 1;
-    //return {x: ref.x - dy * k, y: ref.y + dx * k};
-    return {x: ref.x - dx * k, y: ref.y - dy * k};
-}
-
 function step() {
     const num_particles = particles.length;
-
-    // Torus boundary condition.
-    /*
-    const size = 80;
-    for (let i = 0; i < num_particles; i++) {
-        const p = particles[i];
-        if (p.x < 0) {
-            p.x += size;
-        } else if (p.x > size) {
-            p.x -= size;
-        }
-
-        if (p.y < 0) {
-            p.y += size;
-        } else if (p.y > size) {
-            p.y -= size;
-        }
-    }
-    */
-
 
     const degree = new Array(num_particles);
     degree.fill(0);
@@ -282,10 +243,9 @@ function step() {
                 }
                 const q = particles[j];
                 if (sqdist(p, q) <= 1) {
-                    new_particles.push(reflect_half(p, q));
+                    new_particles.push(reflect(p, q));
                 }
             }
-           // new_particles.push(p);
         } else {
             // keep
             new_particles.push(p);
@@ -330,6 +290,8 @@ function main() {
 
                 this.prevX = ev.clientX;
                 this.prevY = ev.clientY;
+
+                redraw(this.viewportScale, this.viewportOrigin);
             },
             zoom: function(ev) {
                 ev.preventDefault();
@@ -342,6 +304,8 @@ function main() {
 
                 this.viewportOrigin.x = ev.offsetX - centerXSp * this.viewportScale;
                 this.viewportOrigin.y = ev.offsetY - centerYSp * this.viewportScale;
+
+                redraw(this.viewportScale, this.viewportOrigin);
             },
             clickReset: function() {
                 init();
@@ -355,29 +319,24 @@ function main() {
                 this.tick += 1;
                 redraw(this.viewportScale, this.viewportOrigin);
             },
-            clickStart: function() {
-                if (this.interval !== null) {
-                    return;
-                }
-                this.interval = setInterval(() => {
-                    step();
-                    this.numParticles = particles.length;
-                    this.tick += 1;
-                    redraw(this.viewportScale, this.viewportOrigin);
-                }, 50);
-            },
-            clickStop: function() {
+            clickTogglePlaying: function() {
                 if (this.interval === null) {
-                    return;
+                    this.interval = setInterval(() => {
+                        step();
+                        this.numParticles = particles.length;
+                        this.tick += 1;
+                        redraw(this.viewportScale, this.viewportOrigin);
+                    }, 50);    
+                } else {
+                    clearInterval(this.interval);
+                    this.interval = null;
                 }
-                clearInterval(this.interval);
-                this.interval = null;
             },
         },
     });
 
     init();
-    vm.clickStart();
+    vm.clickTogglePlaying();
 }
 
 main();
