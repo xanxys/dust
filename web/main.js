@@ -6,7 +6,35 @@ let tick = 0;
 
 const deg_split = 1;
 const deg_split2 = 2;
-const deg_kill = 4;
+const deg_kill = 6;
+
+/*
+I: stable
+II: repetitive
+III: chaotic
+IV: edge of chaos
+
+SPL=KEEP+REFLECT
+S=1 K>=2: I, II
+S=1 K>=3: I, (II)
+S=1 K>=4: I, (II), linear growth that stops when colliding
+S=1 K>=5: I, linear growth that stops when colliding
+S=1 K>=6: I, linear growth that stops when colliding
+
+S=2 K>=3: (II), III, lattice-like
+S=2 K>=4: III
+S=2 K>=5: III -> I
+S=2 K>=6: I
+
+S=1,2 K>=3: II, (III)
+S=1,2 K>=4: III
+S=1,2 K>=5: II, III, noise between lattice blobs
+S=1,2 K>=6: I, almost stable polycrystal
+
+SPL=REFLECT
+
+*/
+
 
 function redraw() {
     let canvas = document.getElementById("main");
@@ -16,7 +44,7 @@ function redraw() {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.scale(20, 20);
+    ctx.scale(10, 10);
 
     const num_particles = particles.length;
     const degree = new Array(num_particles);
@@ -72,8 +100,8 @@ function redraw() {
 
 function init() {
     particles = [];
-    for (let i = 0; i < 100; i++) {
-        particles.push({x: Math.random() * 10 + 15, y: Math.random() * 10 + 15});
+    for (let i = 0; i < 200; i++) {
+        particles.push({x: Math.random() * 15 + 15, y: Math.random() * 15 + 15});
     }
     tick = 0;
 }
@@ -92,7 +120,7 @@ function step() {
     const num_particles = particles.length;
 
     // Torus boundary condition.
-    const size = 40;
+    const size = 80;
     for (let i = 0; i < num_particles; i++) {
         const p = particles[i];
         if (p.x < 0) {
@@ -178,6 +206,11 @@ function main() {
         interval = null;
     });
 
+    init();
+    interval = setInterval(() => {
+        step();
+        redraw();
+    }, 100);
     redraw();
 }
 
