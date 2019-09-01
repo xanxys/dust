@@ -4,6 +4,10 @@ let interval = null;
 let particles = [];
 let tick = 0;
 
+const deg_split = 1;
+const deg_split2 = 2;
+const deg_kill = 4;
+
 function redraw() {
     let canvas = document.getElementById("main");
     const ctx = canvas.getContext("2d");
@@ -12,9 +16,7 @@ function redraw() {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.scale(25, 25);
-
-
+    ctx.scale(20, 20);
 
     const num_particles = particles.length;
     const degree = new Array(num_particles);
@@ -39,9 +41,9 @@ function redraw() {
 
     
     particles.forEach((p, ix) => {
-        if (degree[ix] == 2) {
+        if (degree[ix] === deg_split || degree[ix] === deg_split2) {
             ctx.fillStyle = "blue";
-        } else if (degree[ix] >= 4) {
+        } else if (degree[ix] >= deg_kill) {
             ctx.fillStyle = "red";
         } else {
             ctx.fillStyle = "black";
@@ -57,12 +59,21 @@ function redraw() {
 
     $("#label_tick").text("tick=" + tick);
     $("#label_num").text("#particles=" + particles.length);
+
+    let rule_text = "";
+    rule_text += `d==0, d>=${deg_kill}: die / `;
+    if (deg_split2 === null) {
+        rule_text += `d==${deg_split}: split`;
+    } else {
+        rule_text += `d==${deg_split},${deg_split2}: split`;
+    }
+    $("#label_rule").text(rule_text);
 }
 
 function init() {
     particles = [];
     for (let i = 0; i < 100; i++) {
-        particles.push({x: Math.random() * 10, y: Math.random() * 10});
+        particles.push({x: Math.random() * 10 + 15, y: Math.random() * 10 + 15});
     }
     tick = 0;
 }
@@ -79,6 +90,25 @@ function reflect(ref, p) {
 
 function step() {
     const num_particles = particles.length;
+
+    // Torus boundary condition.
+    const size = 40;
+    for (let i = 0; i < num_particles; i++) {
+        const p = particles[i];
+        if (p.x < 0) {
+            p.x += size;
+        } else if (p.x > size) {
+            p.x -= size;
+        }
+
+        if (p.y < 0) {
+            p.y += size;
+        } else if (p.y > size) {
+            p.y -= size;
+        }
+    }
+
+
     const degree = new Array(num_particles);
     degree.fill(0);
 
@@ -98,9 +128,9 @@ function step() {
         const p = particles[i];
         const deg = degree[i];
 
-        if (deg == 0 || deg >= 4) {
+        if (deg == 0 || deg >= deg_kill) {
             // die
-        } else if (deg == 2) {
+        } else if (deg == deg_split || deg == deg_split2) {
             // split
             for (let j = 0; j < num_particles; j++) {
                 if (i == j) {
@@ -111,6 +141,7 @@ function step() {
                     new_particles.push(reflect(p, q));
                 }
             }
+            new_particles.push(p);
         } else {
             // keep
             new_particles.push(p);
