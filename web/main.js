@@ -8,7 +8,7 @@ const deg_split = 1;
 const deg_split2 = 2;
 
 const deg_kill_lower = 0;
-const deg_kill_upper = 4;
+const deg_kill_upper = 5;
 
 /*
 I: stable
@@ -201,8 +201,8 @@ function redraw() {
 
 function init() {
     particles = [];
-    for (let i = 0; i < 200; i++) {
-        particles.push({x: Math.random() * 15 + 15, y: Math.random() * 15 + 15});
+    for (let i = 0; i < 500; i++) {
+        particles.push({x: Math.random() * 20 + 15, y: Math.random() * 20 + 15});
     }
     tick = 0;
 }
@@ -232,13 +232,15 @@ function reflect_half(ref, p) {
     const dx = p.x - ref.x;
     const dy = p.y - ref.y;
     const k = 1;
-    return {x: ref.x - dy * k, y: ref.y + dx * k};
+    //return {x: ref.x - dy * k, y: ref.y + dx * k};
+    return {x: ref.x - dx * k, y: ref.y - dy * k};
 }
 
 function step() {
     const num_particles = particles.length;
 
     // Torus boundary condition.
+    /*
     const size = 80;
     for (let i = 0; i < num_particles; i++) {
         const p = particles[i];
@@ -254,6 +256,7 @@ function step() {
             p.y -= size;
         }
     }
+    */
 
 
     const degree = new Array(num_particles);
@@ -289,7 +292,7 @@ function step() {
                     new_particles.push(reflect_half(p, q));
                 }
             }
-            new_particles.push(p);
+           // new_particles.push(p);
         } else {
             // keep
             new_particles.push(p);
@@ -330,7 +333,7 @@ function main() {
     interval = setInterval(() => {
         step();
         redraw();
-    }, 100);
+    }, 50);
     redraw();
 }
 
