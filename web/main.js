@@ -4,9 +4,9 @@ let interval = null;
 let particles = [];
 let tick = 0;
 
-const deg_split = 1;
+const deg_split = 2;
 const deg_split2 = 3;
-const deg_kill = 6;
+const deg_kill = 5;
 
 /*
 I: stable
@@ -33,6 +33,11 @@ S=1,3 K>=4: III -> I
 * S=1,3 K>=5: Potential IV, ladder-like puffer
 S=1,3 K>=6: III, micro+mesoscale III
 
+S=2,3 K>=4: III, (IV), ocassional ladder-glider destroyed by III region
+S=2,3 K>=5: III, (IV), ocassional ladder-glider destroyed by III region
+S=2,3 K>=6: III
+
+Might try K<=1
 
 -- SPL=REFLECT
 S=1 K>=2: I
