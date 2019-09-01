@@ -6,7 +6,7 @@ let tick = 0;
 
 const deg_split = 1;
 const deg_split2 = 2;
-const deg_kill = 6;
+const deg_kill = 5;
 
 /*
 I: stable
@@ -14,7 +14,7 @@ II: repetitive
 III: chaotic
 IV: edge of chaos
 
--- SPL=KEEP+REFLECT
+-- SPL=KEEP+REFLECT (incl. K=0)
 S=1 K>=2: I, II
 S=1 K>=3: I, (II)
 S=1 K>=4: I, (II), linear growth that stops when colliding
@@ -31,7 +31,7 @@ S=1,2 K>=4: III
 S=1,2 K>=5: II, III, noise between lattice blobs
 S=1,2 K>=6: I, almost stable polycrystal
 
--- SPL=REFLECT
+-- SPL=REFLECT (incl. K=0)
 S=1 K>=2: I, nothing
 S=1 K>=3: I, stable triangles
 S=1 K>=4: I, stable meshes
@@ -45,6 +45,20 @@ S=1,2 K>=3: III -> I
 S=1,2 K>=4: III -> I
 * S=1,2 K>=5: often I, II, Potentially IV
 S=1,2 K>=6: III -> I, mesh remains
+
+-- SPL=REFLECT
+S=1 K>=2: I
+S=1 K>=3: I
+S=1 K>=4: I
+
+* S=2 K>=3: I, III, potentially IV, rare gliders
+S=2 K>=4: III, monotonic expansion of III region
+S=2 K>=5: III, gliders often exist, but destroyed by III region
+
+S=1,2 K>=3: III
+S=1,2 K>=4: III
+S=1,2 K>=5: III
+
 
 */
 
@@ -169,7 +183,7 @@ function step() {
         const p = particles[i];
         const deg = degree[i];
 
-        if (deg == 0 || deg >= deg_kill) {
+        if (deg >= deg_kill) {
             // die
         } else if (deg == deg_split || deg == deg_split2) {
             // split
