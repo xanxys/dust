@@ -1,8 +1,6 @@
 "use strict";
 
-let interval = null;
 let particles = [];
-let tick = 0;
 
 const deg_split = 1;
 const deg_split2 = 2;
@@ -162,7 +160,6 @@ function redraw() {
     ctx.lineWidth = 0.03;
     ctx.strokeStyle = "gray";
     ctx.stroke();
-
     
     particles.forEach((p, ix) => {
         const deg = degree[ix];
@@ -179,10 +176,6 @@ function redraw() {
         ctx.fill();
     });
     ctx.restore();
-
-
-    $("#label_tick").text("tick=" + tick);
-    $("#label_num").text("#particles=" + particles.length);
 
     let rule_text = "";
     if (deg_kill_lower < 0) {
@@ -204,7 +197,6 @@ function init() {
     for (let i = 0; i < 500; i++) {
         particles.push({x: Math.random() * 20 + 15, y: Math.random() * 20 + 15});
     }
-    tick = 0;
 }
 
 function sqdist(p, q) {
@@ -299,42 +291,52 @@ function step() {
         }        
     }
     particles = new_particles;
-
-    tick++;
 }
 
 function main() {
-    $("#btn_reset").click(() => {
-        init();
-        redraw();
-    });
-    $("#btn_step").click(() => {
-        step();
-        redraw();
-    });
-    $('#btn_start').click(() => {
-        if (interval !== null) {
-            return;
-        }
-        interval = setInterval(() => {
-            step();
-            redraw();
-        }, 100);
-    });
-    $('#btn_stop').click(() => {
-        if (interval === null) {
-            return;
-        }
-        clearInterval(interval);
-        interval = null;
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            interval: null,
+            tick: 0,
+            numParticles: 0,
+        },
+        methods: {
+            clickReset: function() {
+                init();
+                this.numParticles = particles.length;
+                this.tick = 0;
+                redraw();
+            },
+            clickStep: function() {
+                step();
+                this.numParticles = particles.length;
+                this.tick += 1;
+                redraw();
+            },
+            clickStart: function() {
+                if (this.interval !== null) {
+                    return;
+                }
+                this.interval = setInterval(() => {
+                    step();
+                    this.numParticles = particles.length;
+                    this.tick += 1;
+                    redraw();
+                }, 50);
+            },
+            clickStop: function() {
+                if (this.interval === null) {
+                    return;
+                }
+                clearInterval(this.interval);
+                this.interval = null;
+            },
+        },
     });
 
     init();
-    interval = setInterval(() => {
-        step();
-        redraw();
-    }, 50);
-    redraw();
+    vm.clickStart();
 }
 
 main();
