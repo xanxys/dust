@@ -6,7 +6,7 @@ let tick = 0;
 
 const deg_split = 1;
 const deg_split2 = 2;
-const deg_kill = 5;
+const deg_kill = 3;
 
 /*
 I: stable
@@ -59,6 +59,14 @@ S=1,2 K>=3: III
 S=1,2 K>=4: III
 S=1,2 K>=5: III
 
+-- SPL=KEEP + REFLECT-AVG
+S=2 K>=3: I
+S=2 K>=4: I
+S=2 K>=5: I, mesh coarsing
+
+S=2 K=0,K>=3: I
+S=2 K=0,K>=4: I
+S=2 K=0,K>=5: I, mesh coarsing
 
 */
 
@@ -137,6 +145,17 @@ function sqdist(p, q) {
     return (p.x - q.x) * (p.x - q.x) + (p.y - q.y) * (p.y - q.y);
 }
 
+function avg(ps) {
+    let sx = 0;
+    let sy = 0;
+    for (let i = 0; i < ps.length; i++) {
+        sx += ps[i].x;
+        sy += ps[i].y;
+    }
+    let k = 1.0 / ps.length;
+    return {x: k * sx, y: k * sy};
+}
+
 function reflect(ref, p) {
     const dx = p.x - ref.x;
     const dy = p.y - ref.y;
@@ -183,19 +202,22 @@ function step() {
         const p = particles[i];
         const deg = degree[i];
 
-        if (deg >= deg_kill) {
+        if (deg == 0 || deg >= deg_kill) {
             // die
-        } else if (deg == deg_split || deg == deg_split2) {
+        } else if (deg == 2) {
             // split
+            const ns = [];
             for (let j = 0; j < num_particles; j++) {
                 if (i == j) {
                     continue;
                 }
                 const q = particles[j];
                 if (sqdist(p, q) <= 1) {
-                    new_particles.push(reflect(p, q));
+                    ns.push(q);
                 }
             }
+            new_particles.push(p);
+            new_particles.push(reflect(p, avg(ns)));
         } else {
             // keep
             new_particles.push(p);
