@@ -130,16 +130,16 @@ S=2 K=0,K>=5: I, mesh coarsing
 */
 
 
-function redraw(origin) {
+function redraw(scale, origin) {
     let canvas = document.getElementById("main");
     const ctx = canvas.getContext("2d");
 
-    ctx.save();
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    ctx.save();
     ctx.translate(origin.x, origin.y);
-    ctx.scale(10, 10);
+    ctx.scale(scale, scale);
 
     const num_particles = particles.length;
     const degree = new Array(num_particles);
@@ -303,7 +303,8 @@ function main() {
             numParticles: 0,
 
             // viewport
-            viewportOrigin: {x: 0, y: 0},
+            viewportScale: 10, // px/space
+            viewportOrigin: {x: 0, y: 0}, // px
 
             // drag control
             dragging: false,
@@ -330,17 +331,29 @@ function main() {
                 this.prevX = ev.clientX;
                 this.prevY = ev.clientY;
             },
+            zoom: function(ev) {
+                ev.preventDefault();
+
+                // p = event.offsetX,Y must be preserved.
+                // p<canvas> = p<space> * zoom + t = p<ECA> * new_zoom + new_t
+                var centerXSp = (ev.offsetX - this.viewportOrigin.x) / this.viewportScale;
+                var centerYSp = (ev.offsetY - this.viewportOrigin.y) / this.viewportScale;
+                this.viewportScale = Math.min(50, Math.max(2, this.viewportScale * (1 - ev.deltaY * 0.002)));
+
+                this.viewportOrigin.x = ev.offsetX - centerXSp * this.viewportScale;
+                this.viewportOrigin.y = ev.offsetY - centerYSp * this.viewportScale;
+            },
             clickReset: function() {
                 init();
                 this.numParticles = particles.length;
                 this.tick = 0;
-                redraw(this.viewportOrigin);
+                redraw(this.viewportScale, this.viewportOrigin);
             },
             clickStep: function() {
                 step();
                 this.numParticles = particles.length;
                 this.tick += 1;
-                redraw(this.viewportOrigin);
+                redraw(this.viewportScale, this.viewportOrigin);
             },
             clickStart: function() {
                 if (this.interval !== null) {
@@ -350,7 +363,7 @@ function main() {
                     step();
                     this.numParticles = particles.length;
                     this.tick += 1;
-                    redraw(this.viewportOrigin);
+                    redraw(this.viewportScale, this.viewportOrigin);
                 }, 50);
             },
             clickStop: function() {

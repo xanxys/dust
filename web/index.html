@@ -5,7 +5,7 @@
 
             
             <div>
-                <canvas id="main" width="800" height="800" @mousedown="dragStart" @mouseleave="dragStop" @mouseup="dragStop" @mousemove="drag"></canvas>
+                <canvas id="main" width="800" height="800" @mousedown="dragStart" @mouseleave="dragStop" @mouseup="dragStop" @mousemove="drag" @mousewheel="zoom"></canvas>
             </div>
 
             <div>tick={{tick}}</div>
