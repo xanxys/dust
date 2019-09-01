@@ -7,7 +7,7 @@ let tick = 0;
 const deg_split = 2;
 const deg_split2 = 3;
 
-const deg_kill_lower = -1;
+const deg_kill_lower = 1;
 const deg_kill_upper = 6;
 
 /*
@@ -16,7 +16,28 @@ II: repetitive
 III: chaotic
 IV: edge of chaos
 
--- SPL=REFLECT (incl. K=0)
+-- SPL=REFLECT
+S=1 K>=2: I
+S=1 K>=3: I
+S=1 K>=4: I
+
+* S=2 K>=3: I, III, potentially IV, rare gliders
+S=2 K>=4: III, monotonic expansion of III region
+S=2 K>=5: III, gliders often exist, but destroyed by III region
+
+S=1,2 K>=3: III
+S=1,2 K>=4: III
+S=1,2 K>=5: III
+
+S=1,3 K>=4: multiscale III, too much garbage remaining
+S=1,3 K>=5: III
+S=1,3 K>=6: III, (IV), big glider destroyed by III region
+
+S=2,3 K>=4: III
+S=2,3 K>=5: III, linear glider destroyed by III region
+S=2,3 K>=6: III
+
+-- SPL=REFLECT (K=0)
 S=1 K>=2: I, nothing
 S=1 K>=3: I, stable triangles
 S=1 K>=4: I, stable meshes
@@ -39,28 +60,19 @@ S=2,3 K>=4: III, (IV), ocassional ladder-glider destroyed by III region
 S=2,3 K>=5: III, (IV), ocassional ladder-glider destroyed by III region
 S=2,3 K>=6: III
 
-Might try K<=1
+-- SPL=REFLECT (K<=1)
+S=2 K>=3: I, glider exist, no replication
+S=2 K>=4: I
+S=2 K>=5: I
 
--- SPL=REFLECT
-S=1 K>=2: I
-S=1 K>=3: I
-S=1 K>=4: I
+S=3 K>=4: I
+S=3 K>=5: I
+S=3 K>=6: III
 
-* S=2 K>=3: I, III, potentially IV, rare gliders
-S=2 K>=4: III, monotonic expansion of III region
-S=2 K>=5: III, gliders often exist, but destroyed by III region
+S=2,3 K>=4: III+IV -> I, gliders exist
+S=2,3 K>=5: III (IV) -> I
+S=2,3 K>=6: III (IV)
 
-S=1,2 K>=3: III
-S=1,2 K>=4: III
-S=1,2 K>=5: III
-
-S=1,3 K>=4: multiscale III, too much garbage remaining
-S=1,3 K>=5: III
-S=1,3 K>=6: III, (IV), big glider destroyed by III region
-
-S=2,3 K>=4: III
-S=2,3 K>=5: III, linear glider destroyed by III region
-S=2,3 K>=6: III
 
 -- SPL=KEEP + REFLECT (incl. K=0)
 S=1 K>=2: I, II
