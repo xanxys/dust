@@ -266,13 +266,43 @@ class Vec2 {
         this.x = x;
         this.y = y;
     }
+
+    add(v) {
+        this.x += v.x;
+        this.y += v.y;
+        return this;
+    }
+
+    sub(v) {
+        this.x -= v.x;
+        this.y -= v.y;
+        return this;
+    }
+
+    mult(k) {
+        this.x *= k;
+        this.y *= k;
+        return this;
+    }
+
+    clone() {
+        return new Vec2(this.x, this.y);
+    }
 }
 
-class BoxSelection {
+class AABB {
     constructor(p0, p1) {
-        this.p0 = p0;
-        this.p1 = p1;
+        this.p0 = new Vec2(Math.min(p0.x, p1.x), Math.min(p0.y, p1.y));
+        this.p1 = new Vec2(Math.max(p0.x, p1.x), Math.max(p0.y, p1.y));
     }
+
+    contains(p) {
+        return this.p0.x <= p.x && p.x <= this.p1.x && this.p0.y <= p.y && p.y <= this.p1.y;
+    }
+}
+
+function getParticlesIn(box) {
+    return particles.filter(p => box.contains(p));
 }
 
 function main() {
@@ -294,6 +324,9 @@ function main() {
             selectionBox: null,
         },
         methods: {
+            toSpace: function(pCanvas) {
+                return pCanvas.clone().sub(this.viewportOrigin).mult(1 / this.viewportScale);
+            },
             dragStart: function(ev) {
                 this.dragging = true;
                 this.prevPos = new Vec2(ev.clientX, ev.clientY);
@@ -302,6 +335,9 @@ function main() {
                 this.dragging = false;
                 if (this.captureMode) {
                     // actually capture
+                    const selectionSp = new AABB(this.toSpace(this.selectionBox.p0), this.toSpace(this.selectionBox.p1));
+                    console.log("capture", getParticlesIn(selectionSp));
+                    
                     this.selectionBox = null;
                     this.captureMode = false;
                 }
@@ -315,7 +351,7 @@ function main() {
                 const currPos = new Vec2(ev.clientX, ev.clientY);
                 if (this.captureMode) {
                     // capture: specify box
-                    this.selectionBox = new BoxSelection(this.prevPos, currPos);
+                    this.selectionBox = new AABB(this.prevPos, currPos);
                 } else {
                     // normal: move canvas
                     const dx = ev.clientX - this.prevPos.x;
