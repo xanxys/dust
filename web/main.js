@@ -6,7 +6,9 @@ let tick = 0;
 
 const deg_split = 2;
 const deg_split2 = 3;
-const deg_kill = 5;
+
+const deg_kill_lower = -1;
+const deg_kill_upper = 6;
 
 /*
 I: stable
@@ -52,6 +54,13 @@ S=1,2 K>=3: III
 S=1,2 K>=4: III
 S=1,2 K>=5: III
 
+S=1,3 K>=4: multiscale III, too much garbage remaining
+S=1,3 K>=5: III
+S=1,3 K>=6: III, (IV), big glider destroyed by III region
+
+S=2,3 K>=4: III
+S=2,3 K>=5: III, linear glider destroyed by III region
+S=2,3 K>=6: III
 
 -- SPL=KEEP + REFLECT (incl. K=0)
 S=1 K>=2: I, II
@@ -115,14 +124,14 @@ function redraw() {
 
     
     particles.forEach((p, ix) => {
-        if (degree[ix] === deg_split || degree[ix] === deg_split2) {
+        const deg = degree[ix];
+        if (deg === deg_split || deg === deg_split2) {
             ctx.fillStyle = "blue";
-        } else if (degree[ix] >= deg_kill) {
+        } else if (deg <= deg_kill_lower || deg >= deg_kill_upper) {
             ctx.fillStyle = "red";
         } else {
             ctx.fillStyle = "black";
         }
-        
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, 0.1, 0, 2 * Math.PI);
@@ -135,7 +144,12 @@ function redraw() {
     $("#label_num").text("#particles=" + particles.length);
 
     let rule_text = "";
-    rule_text += `d==0, d>=${deg_kill}: die / `;
+    if (deg_kill_lower < 0) {
+        rule_text += `d>=${deg_kill_upper}: die / `;
+    } else {
+        rule_text += `d<=${deg_kill_lower},>=${deg_kill_upper}: die / `;
+    }
+    
     if (deg_split2 === null) {
         rule_text += `d==${deg_split}: split`;
     } else {
@@ -213,7 +227,7 @@ function step() {
         const p = particles[i];
         const deg = degree[i];
 
-        if (deg == 0 || deg >= deg_kill) {
+        if (deg <= deg_kill_lower || deg >= deg_kill_upper) {
             // die
         } else if (deg === deg_split || deg === deg_split2) {
             // split
