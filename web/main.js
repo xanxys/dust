@@ -1,5 +1,6 @@
 "use strict";
 
+let interval = null;
 let particles = [];
 let tick = 0;
 
@@ -128,6 +129,22 @@ function main() {
     $("#btn_step").click(() => {
         step();
         redraw();
+    });
+    $('#btn_start').click(() => {
+        if (interval !== null) {
+            return;
+        }
+        interval = setInterval(() => {
+            step();
+            redraw();
+        }, 100);
+    });
+    $('#btn_stop').click(() => {
+        if (interval === null) {
+            return;
+        }
+        clearInterval(interval);
+        interval = null;
     });
 
     redraw();
