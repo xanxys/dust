@@ -230,7 +230,7 @@ function sqdist(p, q) {
 function reflect(ref, p) {
     const dx = p.x - ref.x;
     const dy = p.y - ref.y;
-    return {x: ref.x - 0.99 * dx, y: ref.y - 0.99 * dy};
+    return {x: ref.x - dx, y: ref.y - dy};
 }
 
 function normalizePos(ps) {
@@ -253,12 +253,18 @@ function step() {
 
     const degree = new Array(num_particles);
     degree.fill(0);
+    const degreeHalf = new Array(num_particles);
+    degreeHalf.fill(0);
 
     for (let i = 0; i < num_particles; i++) {
         for (let j = 0; j < i; j++) {
             const p = particles[i];
             const q = particles[j];
-            if (sqdist(p, q) <= 1) {
+            const d = sqdist(p, q);
+            if (d <= 0.25) {
+                degreeHalf[i]++;
+                degreeHalf[j]++;
+            } else if (d <= 1) {
                 degree[i]++;
                 degree[j]++;
             }
@@ -268,20 +274,21 @@ function step() {
     const new_particles = [];
     for (let i = 0; i < num_particles; i++) {
         const p = particles[i];
+        const degh = degreeHalf[i];
         const deg = degree[i];
+        const degf = degh + deg;
 
-        if (deg <= deg_kill_lower || deg >= deg_kill_upper) {
+        if (degh <= 0 || degf >= 6) {
             // die
-        } else if (deg === deg_split || deg === deg_split2) {
+        } else if (deg === 2 || deg === 3) {
             // split
-            const ns = [];
             for (let j = 0; j < num_particles; j++) {
                 if (i == j) {
                     continue;
                 }
                 const q = particles[j];
                 const d = sqdist(p, q);
-                if (d <= 1) {
+                if (0.5 < d && d <= 1) {
                     new_particles.push(reflect(p, q));
                 }
             }
