@@ -23,10 +23,21 @@ function redraw(scale, origin, box) {
     ctx.translate(origin.x, origin.y);
     ctx.scale(scale, scale);
 
+    const worldImage = ctx.createImageData(size, size);
+    for (let i = 0; i < size * size; i++) {
+        const v = world[i];
+        worldImage.data[i * 4 + 0] = v >= 200 ? (v - 200) * 10 : 0;
+        worldImage.data[i * 4 + 1] = v;
+        worldImage.data[i * 4 + 2] = v;
+        worldImage.data[i * 4 + 3] = 255;
+    }
+    //ctx.putImageData(worldImage, 0, 0);
+
     for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
             const v = world[i + size * j];
-            ctx.fillStyle = `rgba(${v},${v},${v}, 1)`;
+            const r = v >= 200 ? (v - 200) * 10 : 0;
+            ctx.fillStyle = `rgba(${r},${v},${v}, 1)`;
             ctx.fillRect(i, j, 1, 1);
         }
     }
@@ -41,13 +52,27 @@ function cleanParticles() {
 }
 
 function addRandom(num) {
-    for (let i = 0; i < size * size; i++) {
-        if (Math.random() < 0.3) {
-            world[i] = Math.floor(Math.random() * 255);
-        } else {
-            world[i] = 0;
+    for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+            const i = x + size * y;
+            if (x < 2) {
+                if ((x + y) % 2 == 0) {
+                    world[i] = 0b10101010;
+                } else {
+                    world[i] = 0b01010101;
+                }
+                continue;
+            }
+
+
+
+            if (Math.random() < 0.1) {
+                world[i] = Math.floor(Math.random() * 20 + 200);
+            } else {
+                world[i] = 0;
+            }
+            
         }
-        
     }
 }
 
@@ -77,7 +102,7 @@ function energy(x, y) {
     const vym = world[x + ym * size];
     const vyp = world[x + yp * size];
 
-    return hamming(v, vxm) + hamming(v, vxp) + hamming(v, vym) + hamming(v, vyp);
+    return - (hamming(v, vxm) + hamming(v, vxp) + hamming(v, vym) + hamming(v, vyp)); // - v * y * 0.01;
 }
 
 function swap(ix0, ix1) {
@@ -108,7 +133,11 @@ function step() {
         swap(ix0, ix1);
         const energyPost = energy(x, y) + energy(xp, yp);
         const deltaE = energyPost - energyPre;
-        const probAccept = deltaE < 0 ? 1 : Math.exp(-deltaE / 10);
+        let probAccept = deltaE < 0 ? 1 : 0.1 * Math.exp(-deltaE / 5);
+        if (x <= 1 || xp <= 1) {
+            probAccept = 0;
+        }
+
 
         if (1 - probAccept >= Math.random()) {
             // revert swap
