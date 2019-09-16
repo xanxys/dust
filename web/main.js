@@ -42,7 +42,7 @@ function cleanParticles() {
 
 function addRandom(num) {
     for (let i = 0; i < size * size; i++) {
-        if (Math.random() < 0.05) {
+        if (Math.random() < 0.3) {
             world[i] = Math.floor(Math.random() * 255);
         } else {
             world[i] = 0;
@@ -51,7 +51,39 @@ function addRandom(num) {
     }
 }
 
+function hamming(x, y) {
+    return bitcount8(x ^ y);
+}
+
+function bitcount8(x) {
+    x = ((x & 0b10101010) >> 1) + (x & 0b01010101);
+    x = ((x & 0b11001100) >> 2) + (x & 0b00110011);
+    x = ((x & 0b11110000) >> 4) + (x & 0b00001111);
+    return x;
+}
+
 function addPatternsRandomly(pat, num) {
+}
+
+function energy(x, y) {
+    const xm = (x + size - 1) % size;
+    const xp = (x + 1) % size;
+    const ym = (y + size - 1) % size;
+    const yp = (y + 1) % size;
+
+    const v = world[x + y * size];
+    const vxm = world[xm + y * size];
+    const vxp = world[xp + y * size];
+    const vym = world[x + ym * size];
+    const vyp = world[x + yp * size];
+
+    return hamming(v, vxm) + hamming(v, vxp) + hamming(v, vym) + hamming(v, vyp);
+}
+
+function swap(ix0, ix1) {
+    const t = world[ix1];
+    world[ix1] = world[ix0];
+    world[ix0] = t;
 }
 
 function step() {
@@ -70,12 +102,18 @@ function step() {
             yp = (y + 1) % size;
         }
 
+        const energyPre = energy(x, y) + energy(xp, yp);
         const ix0 = x + size * y;
         const ix1 = xp + size * yp;
+        swap(ix0, ix1);
+        const energyPost = energy(x, y) + energy(xp, yp);
+        const deltaE = energyPost - energyPre;
+        const probAccept = deltaE < 0 ? 1 : Math.exp(-deltaE / 10);
 
-        const t = world[ix1];
-        world[ix1] = world[ix0];
-        world[ix0] = t;
+        if (1 - probAccept >= Math.random()) {
+            // revert swap
+            swap(ix0, ix1);
+        }
     }
 }
 
